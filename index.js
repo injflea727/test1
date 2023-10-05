@@ -124,20 +124,6 @@ function load(options) {
     });
 }
 
-function showSample(swfData) {
-    authorContainer.classList.remove("hidden");
-    author.textContent = swfData.author;
-    author.href = swfData.authorLink;
-    localFileInput.value = null;
-}
-
-function hideSample() {
-    sampleFileInput.selectedIndex = -1;
-    authorContainer.classList.add("hidden");
-    author.textContent = "";
-    author.href = "";
-}
-
 async function loadFile(file) {
     if (!file) {
         return;
@@ -148,19 +134,6 @@ async function loadFile(file) {
     hideSample();
     const data = await new Response(file).arrayBuffer();
     load({ data: data, swfFileName: file.name, ...defaultConfig });
-}
-
-function loadSample() {
-    const swfData = sampleFileInput[sampleFileInput.selectedIndex].swfData;
-    localFileName.textContent = "No file selected.";
-    if (swfData) {
-        showSample(swfData);
-        const config = swfData.config || defaultConfig;
-        load({ url: swfData.location, ...config });
-    } else {
-        hideSample();
-        unload();
-    }
 }
 
 localFileInput.addEventListener("change", (event) => {
@@ -241,36 +214,4 @@ window.onclick = (event) => {
     }
 };
 
-(async () => {
-    const response = await fetch("swfs.json");
-
-    if (response.ok) {
-        const data = await response.json();
-        for (const swfData of data.swfs) {
-            const option = document.createElement("option");
-            option.textContent = swfData.title;
-            option.value = swfData.location;
-            option.swfData = swfData;
-            if (swfData.type) {
-                optionGroups[swfData.type].append(option);
-            } else {
-                sampleFileInput.insertBefore(
-                    option,
-                    sampleFileInput.firstChild,
-                );
-            }
-        }
-        sampleFileInputContainer.classList.remove("hidden");
-    }
-
-    sampleFileInput.selectedIndex = 0;
-    const initialFile = new URL(window.location).searchParams.get("file");
-    if (initialFile) {
-        const options = Array.from(sampleFileInput.options);
-        sampleFileInput.selectedIndex = Math.max(
-            options.findIndex((swfData) => swfData.value.endsWith(initialFile)),
-            0,
-        );
-    }
-    loadSample();
-})();
+();
